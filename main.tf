@@ -44,6 +44,21 @@ resource "aws_instance" "web" {
               EOF
 }
 
+resource "aws_instance" "web-2" {
+  ami                    = "ami-830c94e3"
+  instance_type          = "t2.micro"
+  vpc_security_group_ids = [aws_security_group.web-sg.id]
+  tags = {
+    Name = "web-2"
+  }
+
+  user_data = <<-EOF
+              #!/bin/bash
+              echo "Hello, World!!!" > index.html
+              nohup busybox httpd -f -p 8080 &
+              EOF
+}
+
 resource "aws_security_group" "web-sg" {
   name = "${random_pet.sg.id}-sg"
   ingress {
@@ -56,4 +71,7 @@ resource "aws_security_group" "web-sg" {
 
 output "web-address" {
   value = "${aws_instance.web.public_dns}:8080"
+}
+output "web-address-2" {
+  value = "${aws_instance.web-2.public_dns}:8080"
 }
